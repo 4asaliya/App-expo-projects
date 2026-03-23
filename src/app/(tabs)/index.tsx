@@ -1,55 +1,56 @@
 import CounterButton from "@/components/CounterButton";
 import Greeting from "@/components/Greeting";
 import ProfileCard from "@/components/ProfileCard";
-import { useRouter } from "expo-router";
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { getTodos } from "@/services/todoApi";
+import { Todo } from "@/types/todo";
+import { useEffect, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function HomeScreen() {
-  const router = useRouter();
+  const [todos, setTodos] = useState<Todo[]>([]);
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const fetchTodos = async () => {
+    try {
+      const data = await getTodos();
+      setTodos(data);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      
-      <ImageBackground
-        source={require("../../assets/images/background.jpg")}
-        style={styles.header}
-        resizeMode="cover"
-        imageStyle={{ borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
-      </ImageBackground>
+    <FlatList
+      style={styles.container}
+      data={todos}
+      keyExtractor={(item) => item.id.toString()}
+      ListHeaderComponent={
+        <>
+          <Greeting name="Aliia" role="student" />
 
-      <View style={styles.logoWrapper}>
-        <Image
-          source={require("../../assets/images/bakery.png")}
-          style={styles.logo}
-        />
-      </View>
+          <View style={styles.row}>
+            <CounterButton title="Click" initialValue={2} step={5} />
+            <ProfileCard name="Aliia" role="Student" course={4} />
+          </View>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Fresh bakery</Text>
-        <Text style={styles.subtitle}>
-          Warm bread, sweet pastries, made with love every day
-        </Text>
-
-        <Greeting name="Aliia" role="student" />
+          <Text style={styles.title}>My Todos:</Text>
+        </>
+      }
+      renderItem={({ item }) => (
+        <View style={styles.todo}>
+          <Text>{item.title}</Text>
         </View>
-
-      <View style={styles.row}>
-        <CounterButton 
-            title="CLickkkkk"
-            initialValue={2}
-            step={5}
-        />
-        <ProfileCard
-          name="Aliia"
-          role="Student"
-          course={4}
-        />
-      </View>
-
-    </View>
+      )}
+    />
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -57,61 +58,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAF7F2",
   },
 
-  logoWrapper: {
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-around",
     alignItems: "center",
-    marginTop: -60,
-  },
-
-  header:{
-    width:"100%",
-    height: 260,
-    justifyContent:"flex-end",
-    paddingBottom:20,
-  },
-
-  logo: {
-    width: 120,
-    height: 120,
-    backgroundColor: "#FFF",
-    borderRadius: 60,
-    padding: 20,
-    resizeMode: "contain",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-
-  content: {
-    flex: 1,
-    alignItems: "center",
-    paddingHorizontal: 24,
-    marginTop: 20,
+    width: "100%",
+    marginBottom: 30,
+    paddingHorizontal: 20,
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: "600",
-    color: "#3E2C1C",
+    fontSize: 20,
+    marginLeft: 20,
+    marginBottom: 10,
+  },
+
+  todo: {
+    padding: 10,
+    backgroundColor: "#eee",
+    marginHorizontal: 20,
     marginBottom: 8,
-  },
-
-  subtitle: {
-    fontSize: 15,
-    color: "#7A6A58",
-    textAlign: "center",
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-
-  footer: {
-    padding: 24,
-  },
-
-  row: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  width: "100%",
+    borderRadius: 6,
   },
 });
